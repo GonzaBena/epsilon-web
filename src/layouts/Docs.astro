@@ -1,0 +1,282 @@
+---
+import Base from './Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import DocsNav from '../components/DocsNav.astro';
+import { getDocs, navTitle, type DocEntry } from '../lib/docs';
+import { url } from '../lib/url';
+
+interface Props {
+  doc: DocEntry;
+}
+
+const { doc } = Astro.props;
+const docs = await getDocs();
+const index = docs.findIndex((d) => d.id === doc.id);
+const prev = docs[index - 1];
+const next = docs[index + 1];
+// El subtítulo admite `código` en línea: se escapa el texto y solo se convierten las comillas invertidas.
+const escape = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const leadHtml = escape(doc.data.lead).replace(/`([^`]+)`/g, '<code>$1</code>');
+const href = (id: string) => (id === 'index' ? url('docs/') : url(`docs/${id}/`));
+---
+
+<Base title={`Epsilon — documentación: ${navTitle(doc).toLowerCase()}`} description={doc.data.lead}>
+  <SiteHeader current="docs" wide bordered />
+
+  <div class="shell">
+    <div class="side">
+      <DocsNav current={doc.id} />
+    </div>
+
+    <main>
+      <nav aria-label="Ruta" class="crumbs">
+        {doc.id === 'index' ? <span>Docs</span> : <a href={url('docs/')}>Docs</a>}
+        <span aria-hidden="true">/</span>
+        <span>{doc.data.group}</span>
+        <span aria-hidden="true">/</span>
+        <span class="here">{navTitle(doc)}</span>
+      </nav>
+
+      <h1>{doc.data.title}</h1>
+      <p class="lead-text" set:html={leadHtml} />
+
+      <div class="prose">
+        <slot />
+      </div>
+
+      <div class:list={['pager', { only: !prev }]}>
+        {
+          prev && (
+            <a class="pg" href={href(prev.id)}>
+              <span class="dir">Anterior</span>
+              <span class="name">{navTitle(prev)}</span>
+            </a>
+          )
+        }
+        {
+          next && (
+            <a class="pg next" href={href(next.id)}>
+              <span class="dir">Siguiente</span>
+              <span class="name">{navTitle(next)}</span>
+            </a>
+          )
+        }
+      </div>
+    </main>
+  </div>
+
+  <SiteFooter wide />
+</Base>
+
+<style>
+  .shell {
+    max-width: var(--w-docs);
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0 56px;
+  }
+  .side {
+    flex: 1 1 220px;
+    max-width: 100%;
+    padding: 32px 0 24px;
+  }
+  main {
+    flex: 999 1 560px;
+    min-width: 0;
+    max-width: 760px;
+    padding: 48px 0 96px;
+  }
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .crumbs a:hover,
+  .here {
+    color: var(--text);
+  }
+  h1 {
+    margin: 20px 0 0;
+    font-size: clamp(2rem, 4.4vw, 2.75rem);
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+  .lead-text {
+    margin: 16px 0 0;
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+  .lead-text :global(code) {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: var(--text);
+  }
+  .prose {
+    margin-top: 40px;
+  }
+
+  /* Contenido en Markdown */
+  .prose :global(h2) {
+    margin: 48px 0 0;
+    font-size: 1.35rem;
+    line-height: 1.55;
+    font-weight: 600;
+  }
+  .prose :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .prose :global(p) {
+    margin: 12px 0 0;
+    color: var(--text-control);
+  }
+  .prose :global(p:first-child),
+  .prose :global(ul:first-child),
+  .prose :global(ol:first-child),
+  .prose :global(pre:first-child) {
+    margin-top: 0;
+  }
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 12px 0 0;
+    padding: 0 0 0 20px;
+    color: var(--text-control);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .prose :global(a) {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose :global(code) {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .prose :global(pre) {
+    margin: 16px 0 0;
+    padding: 14px 16px;
+    background: var(--side);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .prose :global(pre code) {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+  }
+  /* Aviso: se escribe como cita. */
+  .prose :global(blockquote) {
+    margin: 24px 0 0;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface-2);
+    font-size: 14px;
+    color: var(--text-control);
+  }
+  .prose :global(blockquote p) {
+    margin: 0;
+  }
+  .prose :global(blockquote strong) {
+    font-weight: 600;
+    color: var(--text);
+  }
+  /* Tabla de dos columnas: variables y módulos. */
+  .prose :global(table) {
+    width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--side);
+    overflow: hidden;
+  }
+  .prose :global(th) {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+  .prose :global(td) {
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+    vertical-align: top;
+    font-size: 14px;
+    color: var(--text-control);
+  }
+  .prose :global(td:first-child) {
+    width: 240px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+  .prose :global(td:first-child code) {
+    padding: 0;
+    background: none;
+  }
+  @media (max-width: 640px) {
+    .prose :global(td:first-child) {
+      width: auto;
+    }
+  }
+
+  .pager {
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .pager.only {
+    justify-content: flex-end;
+  }
+  .pg {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 200px;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+  }
+  .pg.next {
+    align-items: flex-end;
+  }
+  .pg:hover {
+    background: var(--side);
+  }
+  .dir {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .name {
+    font-size: 14px;
+    font-weight: 500;
+  }
+</style>

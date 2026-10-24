@@ -1,0 +1,26 @@
+---
+interface Props {
+  /** Con `upper`, la etiqueta va en mayúsculas (mismo estilo que usa la maqueta del chat). */
+  upper?: boolean;
+}
+const { upper = false } = Astro.props;
+---
+
+<span class:list={['ai', { upper }]}>IA</span>
+
+<style>
+  .ai {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--accent-card);
+    border: 1px solid var(--accent-line);
+    color: var(--accent);
+  }
+  .ai.upper {
+    text-transform: uppercase;
+  }
+</style>

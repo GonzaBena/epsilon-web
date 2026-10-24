@@ -1,0 +1,113 @@
+---
+import logo from '../assets/logo.svg';
+import { GITHUB, url } from '../lib/url';
+
+interface Props {
+  current?: 'inicio' | 'instalar' | 'docs';
+  /** Ancho máximo del contenido: la landing usa 1160px y la documentación 1240px. */
+  wide?: boolean;
+  /** En la landing los enlaces "Qué hace" e "Instalar" saltan a su sección. */
+  onLanding?: boolean;
+  /** Con borde inferior (barra de docs). */
+  bordered?: boolean;
+}
+
+const { current, wide = false, onLanding = false, bordered = false } = Astro.props;
+
+const links = [
+  { id: 'que-hace', label: 'Qué hace', href: onLanding ? '#que-hace' : url('#que-hace'), current: false },
+  { id: 'instalar', label: 'Instalación', href: url('instalar/'), current: current === 'instalar' },
+  { id: 'docs', label: 'Docs', href: url('docs/'), current: current === 'docs' },
+];
+const installHref = onLanding ? '#instalacion' : url('instalar/');
+---
+
+<header class:list={['bar', { bordered }]}>
+  <div class:list={['bar-inner', { wide }]}>
+    <a class="brand" href={url()} aria-label="Epsilon, inicio">
+      <img src={logo.src} alt="" width="28" height="28" />
+      <span>epsilon</span>
+    </a>
+    <nav aria-label="Principal">
+      {
+        links.map((l) => (
+          <a class="nav-link" href={l.href} aria-current={l.current ? 'page' : undefined}>
+            {l.label}
+          </a>
+        ))
+      }
+      <a class="nav-link" href={GITHUB} target="_blank" rel="noopener">GitHub</a>
+      {current !== 'instalar' && <a class="btn-primary" href={installHref}>Instalar</a>}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .bar.bordered {
+    border-bottom: 1px solid var(--line);
+  }
+  .bar-inner {
+    max-width: var(--w-site);
+    margin: 0 auto;
+    padding: 8px 24px;
+    min-height: 64px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 24px;
+  }
+  .bar-inner.wide {
+    max-width: var(--w-docs);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+  }
+  .brand span {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+  }
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-control);
+  }
+  .nav-link:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .nav-link[aria-current='page'] {
+    background: var(--accent-soft);
+    color: var(--text);
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 18px;
+    margin-left: 8px;
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.08);
+  }
+</style>

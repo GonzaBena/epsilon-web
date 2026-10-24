@@ -1,0 +1,30 @@
+---
+interface Props {
+  code: string;
+  /** Fondo del bloque: `bg` dentro de tarjetas, `side` sobre la página. */
+  tone?: 'bg' | 'side';
+}
+const { code, tone = 'side' } = Astro.props;
+---
+
+<pre class={tone}><code>{code}</code></pre>
+
+<style>
+  pre {
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .bg {
+    background: var(--bg);
+  }
+  .side {
+    background: var(--side);
+  }
+</style>

@@ -1,0 +1,25 @@
+---
+import { render } from 'astro:content';
+import Docs from '../../layouts/Docs.astro';
+import { getDocs } from '../../lib/docs';
+
+export async function getStaticPaths() {
+  const docs = await getDocs();
+  return (
+    docs
+      // /docs/comandos/ tiene su propia página (src/pages/docs/comandos.astro).
+      .filter((doc) => doc.id !== 'comandos')
+      .map((doc) => ({
+        params: { slug: doc.id === 'index' ? undefined : doc.id },
+        props: { doc },
+      }))
+  );
+}
+
+const { doc } = Astro.props;
+const { Content } = await render(doc);
+---
+
+<Docs doc={doc}>
+  <Content />
+</Docs>

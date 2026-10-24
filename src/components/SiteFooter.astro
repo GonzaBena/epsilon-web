@@ -1,0 +1,133 @@
+---
+import logo from '../assets/logo.svg';
+import { GITHUB, GITHUB_ISSUES, url } from '../lib/url';
+
+interface Props {
+  /** `full`: pie de la landing, con columnas. `compact`: pie de Instalar y de la documentación. */
+  variant?: 'full' | 'compact';
+  wide?: boolean;
+  onLanding?: boolean;
+}
+
+const { variant = 'compact', wide = false, onLanding = false } = Astro.props;
+---
+
+<footer>
+  {
+    variant === 'full' ? (
+      <div class="full">
+        <div class="about">
+          <div class="brand">
+            <img src={logo.src} alt="" width="24" height="24" />
+            <span>epsilon</span>
+          </div>
+          <p>Un agente personal que corre en tu máquina. Licencia MIT.</p>
+        </div>
+        <div class="cols">
+          <nav aria-label="Producto">
+            <span class="col-title">Producto</span>
+            <a href={onLanding ? '#que-hace' : url('#que-hace')}>Qué hace</a>
+            <a href={url('instalar/')}>Instalar</a>
+            <a href={url('docs/')}>Documentación</a>
+          </nav>
+          <nav aria-label="Proyecto">
+            <span class="col-title">Proyecto</span>
+            <a href={GITHUB} target="_blank" rel="noopener">GitHub</a>
+            <a href={GITHUB_ISSUES} target="_blank" rel="noopener">Reportar un problema</a>
+          </nav>
+        </div>
+      </div>
+    ) : (
+      <div class:list={['compact', { wide }]}>
+        <span>epsilon · licencia MIT</span>
+        <div class="links">
+          <a href={url()}>Inicio</a>
+          <a href={url('instalar/')}>Instalar</a>
+          <a href={GITHUB} target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+    )
+  }
+</footer>
+
+<style>
+  footer {
+    border-top: 1px solid var(--line);
+  }
+  .full {
+    max-width: var(--w-site);
+    margin: 0 auto;
+    padding: 40px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 32px 48px;
+  }
+  .about {
+    max-width: 320px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+  }
+  .about p {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .cols {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px 64px;
+  }
+  nav {
+    display: flex;
+    flex-direction: column;
+  }
+  .col-title {
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 14px;
+    color: var(--text-control);
+  }
+  .compact {
+    max-width: var(--w-site);
+    margin: 0 auto;
+    padding: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 24px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .compact.wide {
+    max-width: var(--w-docs);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 8px;
+  }
+  nav a:hover,
+  .links a:hover {
+    color: var(--text);
+  }
+</style>

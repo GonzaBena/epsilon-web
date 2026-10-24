@@ -1,0 +1,627 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import AiBadge from '../components/AiBadge.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import waves from '../assets/waves.svg';
+import { GITHUB, url } from '../lib/url';
+
+const features = [
+  {
+    title: 'Notas y archivos',
+    text: 'Guardá una nota con una línea y tus archivos en una carpeta tuya. Después buscalos cuando los necesites.',
+    chips: ['+ texto', '/ver', '/buscar', '/archivos'],
+    icon: ['M6 3h9l4 4v14H6z', 'M15 3v4h4', 'M9 12h6', 'M9 16h6'],
+  },
+  {
+    title: 'Imagen a CSV',
+    text: 'Pasá tickets, planillas y facturas a CSV. Lo que sale de la imagen se muestra y se confirma antes de guardar.',
+    chips: ['/ticket'],
+    ai: true,
+    icon: ['M3 10h18', 'M9 10v10'],
+    rect: { x: 3, y: 4, width: 18, height: 16, rx: 2 },
+  },
+  {
+    title: 'Resúmenes',
+    text: 'Resumí notas, PDFs e imágenes con IA sin salir de la conversación.',
+    chips: ['/resumir'],
+    ai: true,
+    icon: ['M4 6h16', 'M4 12h10', 'M4 18h6'],
+  },
+  {
+    title: 'Preguntas y memoria',
+    text: 'Preguntale lo que quieras, con acceso opcional a tus notas y a lo que le pediste recordar. Cada chat tiene un límite de costo y podés ver lo gastado.',
+    chips: ['/ia', '/recordar', '/memoria', '/uso'],
+    icon: ['M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z'],
+  },
+  {
+    title: 'Notas de voz',
+    text: 'Whisper corre en tu equipo y transcribe lo que dictás. Es opcional: se activa con el extra de voz.',
+    chips: ['uv sync --extra voz'],
+    icon: ['M5 11a7 7 0 0 0 14 0', 'M12 18v3'],
+    rect: { x: 9, y: 3, width: 6, height: 11, rx: 3 },
+  },
+  {
+    title: 'Web, Telegram y más canales',
+    text: 'Usala desde la web local o desde un bot de Telegram que le responde solo a tu usuario. Otros canales se suman con plugins.',
+    chips: ['/menu', '/nuevo', '/ayuda'],
+    icon: ['M21 4L3 11l7 2.5L12.5 21z', 'M21 4L10 13.5'],
+  },
+];
+
+const installCards = [
+  {
+    title: 'Desde el repositorio',
+    text: 'Clona el proyecto e instala las dependencias básicas.',
+    code: 'git clone https://github.com/GonzaBena/epsilon-agent.git\ncd epsilon-agent\nuv sync',
+  },
+  { title: 'Con voz', text: 'Suma Whisper para transcribir notas de voz en tu equipo.', code: 'uv sync --extra voz' },
+  {
+    title: 'Como servicio',
+    text: 'Corre en segundo plano con systemd. Primero editá las rutas de',
+    path: 'deploy/epsilon.service',
+    code: 'systemctl --user enable --now \\\n  /ruta/a/deploy/epsilon.service',
+  },
+];
+
+const securityPoints = [
+  { before: 'La web escucha solo en ', mono: '127.0.0.1', after: '' },
+  { before: 'El bot responde solo al ', mono: 'ALLOWED_USER_ID', after: '' },
+  { before: 'Las claves no salen del servidor', mono: '', after: '' },
+  { before: 'El acceso a archivos se limita a ', mono: 'DATA_DIR', after: '' },
+];
+---
+
+<Base title="Epsilon — tu agente personal, en tu máquina">
+  <div class="page">
+    <div class="waves" aria-hidden="true">
+      <img src={waves.src} alt="" />
+    </div>
+
+    <div class="content">
+      <SiteHeader current="inicio" onLanding />
+
+      <section class="hero">
+        <div>
+          <div class="badge">
+            <span class="dot"></span>
+            <span>agente personal · local · licencia MIT</span>
+          </div>
+          <h1>Tu agente personal, en tu máquina.</h1>
+          <p class="hero-text">
+            Epsilon guarda tus notas y archivos, pasa imágenes a CSV, resume y responde con IA. Se usa desde una web local y, si querés, desde Telegram.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href={url('instalar/')}>Instalar Epsilon</a>
+            <a class="btn btn-secondary" href={url('docs/')}>Leer la documentación</a>
+            <a class="btn btn-ghost" href={GITHUB} target="_blank" rel="noopener">Ver en GitHub</a>
+          </div>
+          <p class="fineprint">
+            Tus datos quedan en tu equipo. La clave de Gemini es opcional: sin ella, notas, archivos, búsqueda y memoria siguen funcionando.
+          </p>
+        </div>
+
+        <div class="chat" role="img" aria-label="Ejemplo de conversación: el comando /ticket con una imagen y la confirmación para guardar el CSV">
+          <div class="chat-bar">Conversación nueva</div>
+          <div class="chat-body">
+            <div class="msg-user">
+              <span class="mono">/ticket</span>
+              <span class="file">ticket-super.jpg</span>
+            </div>
+            <div class="msg-bot">
+              <div class="who"><AiBadge upper /><span>Epsilon</span></div>
+              <p>Esto salió de la imagen. Revisalo antes de guardar.</p>
+              <div class="chat-actions">
+                <span class="chat-btn chat-btn-primary">Guardar</span>
+                <span class="chat-btn">Descartar</span>
+              </div>
+            </div>
+          </div>
+          <div class="composer">Escribí un mensaje o un comando con /</div>
+        </div>
+      </section>
+
+      <section id="instalacion" class="section">
+        <div class="eyebrow">Instalación</div>
+        <h2 class="section-title">Tres comandos y está corriendo.</h2>
+        <p class="lead">
+          Necesitás <a class="inline-link" href="https://docs.astral.sh/uv/" target="_blank" rel="noopener">uv</a> y Python 3.12 o superior.
+        </p>
+
+        <div class="grid install-rows">
+          {
+            installCards.map((c) => (
+              <div class="card install-card">
+                <div>
+                  <h3>{c.title}</h3>
+                  <p>
+                    {c.text}
+                    {c.path && (
+                      <>
+                        {' '}
+                        <span class="mono-s">{c.path}</span>.
+                      </>
+                    )}
+                  </p>
+                </div>
+                <CodeBlock code={c.code} tone="bg" />
+              </div>
+            ))
+          }
+        </div>
+
+        <div class="after">
+          <div>
+            <div class="after-title">Después, arrancá y abrí la web local.</div>
+            <div class="after-text">
+              Cargá tu clave de Gemini en <span class="mono-s">/config</span> y probá la conexión sin gastar tokens.
+            </div>
+          </div>
+          <CodeBlock code="uv run epsilon   # http://127.0.0.1:8765" tone="bg" />
+        </div>
+
+        <a class="more" href={url('instalar/')}>
+          Guía de instalación completa
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+        </a>
+      </section>
+
+      <section id="que-hace" class="section">
+        <div class="eyebrow">Qué hace</div>
+        <h2 class="section-title">Todo lo que le pedís, desde un solo lugar.</h2>
+        <p class="lead">Se maneja con comandos cortos o escribiéndole normal. Lo que usa IA lleva la etiqueta IA.</p>
+
+        <div class="grid grid-320">
+          {
+            features.map((f) => (
+              <div class="card feature">
+                <div class="icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    {f.rect && <rect {...f.rect} />}
+                    {f.icon.map((d) => <path d={d} />)}
+                  </svg>
+                </div>
+                <h3>{f.title}</h3>
+                <p>{f.text}</p>
+                <div class="chips">
+                  {f.chips.map((c) => <span class="chip">{c}</span>)}
+                  {f.ai && <AiBadge />}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <section id="seguridad" class="section security">
+        <div>
+          <div class="eyebrow">Seguridad</div>
+          <h2 class="section-title">Local por diseño.</h2>
+          <p class="lead narrow">
+            Epsilon corre en tu máquina y lo que viene de afuera es dato, nunca instrucción. La web no tiene login: si la exponés a la red, agregale contraseña y HTTPS.
+          </p>
+        </div>
+        <ul class="checks">
+          {
+            securityPoints.map((p) => (
+              <li>
+                <span class="check">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"></path></svg>
+                </span>
+                <span>
+                  {p.before}
+                  {p.mono && <span class="mono-s strong">{p.mono}</span>}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="section">
+        <div class="cta">
+          <div class="cta-text">
+            <h2 class="section-title">Probalo en tu máquina.</h2>
+            <p>Es de código abierto, con licencia MIT. Clonalo, instalalo y empezá con una nota.</p>
+          </div>
+          <div class="actions">
+            <a class="btn btn-primary" href={url('instalar/')}>Instalar Epsilon</a>
+            <a class="btn btn-secondary" href={url('docs/')}>Documentación</a>
+          </div>
+        </div>
+      </section>
+
+      <SiteFooter variant="full" onLanding />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .page {
+    position: relative;
+    overflow: clip;
+  }
+  .waves {
+    position: absolute;
+    inset: 0 -120px 0 auto;
+    width: min(780px, 80vw);
+    pointer-events: none;
+  }
+  .waves img {
+    position: sticky;
+    top: 16px;
+    width: 100%;
+    height: auto;
+    opacity: 0.16;
+  }
+  .content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Hero */
+  .hero {
+    max-width: var(--w-site);
+    margin: 0 auto;
+    padding: 72px 24px 96px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr));
+    gap: 56px;
+    align-items: center;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--accent);
+  }
+  h1 {
+    margin: 24px 0 0;
+    font-size: clamp(2.5rem, 6vw, 4.25rem);
+    line-height: 1.05;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .hero-text {
+    margin: 24px 0 0;
+    max-width: 540px;
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .hero .actions {
+    margin-top: 32px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 22px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.08);
+  }
+  .btn-secondary {
+    background: var(--surface-2);
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    font-weight: 500;
+  }
+  .btn-secondary:hover {
+    background: #26292b;
+  }
+  .btn-ghost {
+    padding: 0 12px;
+    color: var(--text-control);
+    font-weight: 500;
+  }
+  .btn-ghost:hover {
+    color: var(--text);
+  }
+  .fineprint {
+    margin: 24px 0 0;
+    max-width: 520px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* Maqueta del chat */
+  .chat {
+    background: var(--side);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .chat-bar {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .chat-body {
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .msg-user {
+    align-self: flex-end;
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: #1f2519;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+  .file {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .msg-bot {
+    max-width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .who {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .msg-bot p {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .chat-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chat-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--text-control);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .chat-btn-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+  .composer {
+    margin: 0 16px 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* Secciones */
+  .section {
+    max-width: var(--w-site);
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+  .grid {
+    margin-top: 40px;
+    display: grid;
+    gap: 16px;
+  }
+  .grid-320 {
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  }
+  .card {
+    background: var(--side);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .card h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .card p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  /* Una tarjeta por fila: descripción a la izquierda y comando a la derecha. */
+  .install-rows {
+    grid-template-columns: 1fr;
+  }
+  .install-card {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 32px;
+  }
+  .install-card > :global(div:first-child) {
+    flex: 1 1 280px;
+    min-width: 0;
+  }
+  .install-card > :global(pre) {
+    flex: 1 1 380px;
+    min-width: 0;
+  }
+  .install-card p {
+    margin-top: 6px;
+  }
+  .mono-s {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+  }
+  .after {
+    margin-top: 16px;
+    background: var(--accent-card);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 32px;
+  }
+  .after > :global(pre) {
+    max-width: 100%;
+  }
+  .after-title {
+    font-weight: 600;
+  }
+  .after-text {
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--text-control);
+  }
+  .more {
+    margin-top: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    color: var(--text-control);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .more:hover {
+    color: var(--text);
+  }
+
+  /* Qué hace */
+  .feature {
+    gap: 12px;
+  }
+  .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-control);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 4px;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 2px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--text-control);
+  }
+
+  /* Seguridad */
+  .security {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+    gap: 48px;
+    align-items: start;
+  }
+  .narrow {
+    max-width: 480px;
+  }
+  .checks {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--side);
+    overflow: hidden;
+  }
+  .checks li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    font-size: 15px;
+  }
+  .checks li + li {
+    border-top: 1px solid var(--line);
+  }
+  .check {
+    color: var(--accent);
+    display: inline-flex;
+  }
+  .strong {
+    font-size: 13px;
+  }
+
+  /* Cierre */
+  .cta {
+    background: var(--accent-card);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--radius-lg);
+    padding: clamp(28px, 5vw, 56px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px 40px;
+  }
+  .cta-text {
+    min-width: 0;
+    max-width: 560px;
+  }
+  .cta-text .section-title {
+    margin: 0;
+  }
+  .cta-text p {
+    margin: 12px 0 0;
+    color: var(--text-control);
+  }
+</style>

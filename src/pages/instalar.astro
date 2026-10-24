@@ -1,0 +1,328 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import { installMethods, maintenanceRows } from '../data/install';
+import { url } from '../lib/url';
+
+const steps = [
+  {
+    n: '01',
+    title: 'Configurá',
+    html: 'Copiá <span class="mono-s">src/epsilon/.env.example</span> a <span class="mono-s">src/epsilon/.env</span> y cargá tu <span class="mono-s">GEMINI_API_KEY</span>.',
+  },
+  { n: '02', title: 'Arrancá', html: 'Corré el agente desde la carpeta del proyecto.', code: 'uv run epsilon' },
+  {
+    n: '03',
+    title: 'Probá la conexión',
+    html: 'Abrí <span class="mono-s">127.0.0.1:8765/config</span> y tocá «Probar conexión». No gasta tokens.',
+  },
+];
+---
+
+<Base title="Epsilon — instalar" description="Clonás el repositorio, instalás con uv y abrís la web local. Todo corre en tu equipo.">
+  <SiteHeader current="instalar" />
+
+  <main>
+    <div class="eyebrow">Instalación</div>
+    <h1>Instalá Epsilon en tu máquina.</h1>
+    <p class="intro">Clonás el repositorio, instalás con uv y abrís la web local. Todo corre en tu equipo.</p>
+
+    <div class="pills">
+      <span>Python 3.12 o superior</span>
+      <a href="https://docs.astral.sh/uv/" target="_blank" rel="noopener">uv</a>
+      <span>GEMINI_API_KEY opcional</span>
+    </div>
+
+    <section>
+      <h2>Elegí cómo instalarlo</h2>
+      <div class="tabs" role="group" aria-label="Método de instalación">
+        {
+          installMethods.map((m, i) => (
+            <button type="button" data-tab={m.id} aria-pressed={i === 0 ? 'true' : 'false'}>
+              {m.label}
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="panel">
+        {
+          installMethods.map((m, i) => (
+            <div data-panel={m.id} hidden={i !== 0}>
+              <h3>{m.title}</h3>
+              <p>{m.desc}</p>
+              <div class="code">
+                <CodeBlock code={m.code} tone="bg" />
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="spaced">
+      <h2>Después de instalar</h2>
+      <div class="steps">
+        {
+          steps.map((s) => (
+            <div class="step">
+              <div class="num">{s.n}</div>
+              <h3>{s.title}</h3>
+              <p set:html={s.html} />
+              {s.code && (
+                <div class="step-code">
+                  <CodeBlock code={s.code} tone="bg" />
+                </div>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="spaced">
+      <h2>Mantenimiento</h2>
+      <dl class="table">
+        {
+          maintenanceRows.map((r) => (
+            <div class="row">
+              <dt>{r.label}</dt>
+              <dd>{r.cmd}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="note">Después de cambiar la configuración, reiniciá Epsilon a mano.</p>
+    </section>
+
+    <section class="closing">
+      <div>
+        <h2>¿Ya está corriendo?</h2>
+        <p>Mirá la lista de comandos, las variables de entorno y cómo funciona el bot de Telegram.</p>
+      </div>
+      <a class="btn" href={url('docs/')}>Leer la documentación</a>
+    </section>
+  </main>
+
+  <SiteFooter />
+</Base>
+
+<script>
+  const tabs = document.querySelectorAll<HTMLButtonElement>('[data-tab]');
+  const panels = document.querySelectorAll<HTMLElement>('[data-panel]');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t) => t.setAttribute('aria-pressed', String(t === tab)));
+      panels.forEach((p) => {
+        p.hidden = p.dataset.panel !== tab.dataset.tab;
+      });
+    });
+  });
+</script>
+
+<style>
+  main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+  h1 {
+    margin: 12px 0 0;
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+    line-height: 1.08;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .intro {
+    margin: 20px 0 0;
+    max-width: 600px;
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+  .pills {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pills > * {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 6px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--text-control);
+  }
+  .pills a:hover {
+    color: var(--text);
+  }
+  section {
+    margin-top: 56px;
+  }
+  section.spaced {
+    margin-top: 64px;
+  }
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1.55;
+    font-weight: 600;
+  }
+  h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .tabs {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .tabs button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    border: 1px solid var(--line-strong);
+    color: var(--text-control);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .tabs button[aria-pressed='true'] {
+    background: var(--accent-soft);
+    border-color: var(--accent-line);
+    color: var(--text);
+  }
+  .panel {
+    margin-top: 16px;
+    background: var(--side);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: clamp(20px, 4vw, 32px);
+  }
+  .panel p {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .code {
+    margin-top: 20px;
+  }
+
+  .steps {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 16px;
+  }
+  .step {
+    background: var(--side);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    min-width: 0;
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .step h3 {
+    margin-top: 8px;
+  }
+  .step p {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .step-code {
+    margin-top: 12px;
+  }
+  :global(.mono-s) {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .table {
+    margin: 16px 0 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--side);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 8px 24px;
+    padding: 14px 20px;
+    align-items: center;
+  }
+  .row + .row {
+    border-top: 1px solid var(--line);
+  }
+  dt {
+    font-size: 14px;
+    color: var(--text-control);
+  }
+  dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+  .note {
+    margin: 16px 0 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .closing {
+    background: var(--accent-card);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--radius-lg);
+    padding: clamp(24px, 4vw, 40px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px 32px;
+  }
+  .closing > div {
+    min-width: 0;
+    max-width: 460px;
+  }
+  .closing h2 {
+    line-height: 1.4;
+  }
+  .closing p {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: var(--text-control);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 22px;
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .btn:hover {
+    filter: brightness(1.08);
+  }
+</style>

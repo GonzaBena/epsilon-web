@@ -1,0 +1,27 @@
+/* Tokens del sistema de diseño de Epsilon (tema oscuro, un solo acento). */
+:root {
+  --bg: #0e0f10;
+  --side: #141516;
+  --surface: #151718;
+  --surface-2: #1b1e1f;
+  --line: #26292b;
+  --line-strong: #2c3032;
+  --text: #e8e9e6;
+  --text-control: #c9cdc9;
+  --muted: #a1a6a1;
+  --accent: #b8fd2c;
+  --on-accent: #0e0f10;
+  --accent-soft: #1a2012;
+  --accent-card: #1e2317;
+  --accent-line: #3c492b;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+
+  --w-site: 1160px;
+  --w-docs: 1240px;
+}
